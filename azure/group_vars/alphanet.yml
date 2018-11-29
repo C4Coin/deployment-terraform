@@ -39,17 +39,17 @@ bootnode_count: 2
 bootnode_balanced_count: 2
 
 #Required number of initial keys to generate (defaults to 1, not more than 12)
-initial_key_count: 4
+initial_key_count: 3
 
 #Required number of validator nodes to launch (defaults to 1, not more than `initial_key_count`)
-validator_count: 4
+validator_count: 3
 
 #Required number of initial keys to convert to production keys (defaults to 1, not more than `initial_key_count`)
-initial_key_convert_count: 4
+initial_key_convert_count: 3
 
 ##Prefix, that will be used for all resources ("tf-" by default)
 tf_prefix: "tf-"
 ##Set name of resource group. Will be created with the following name if is not already exists. If this variable is empty - resource group will be created automatically with the following name: {{ NETWORK_NAME }}rg
-resource_group_name : "tf-alphanet-setup"
+resource_group_name : "tf-alphanet-rg"
 ##Region where resources should be created
 region : "East US"

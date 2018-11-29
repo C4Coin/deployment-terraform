@@ -7,7 +7,7 @@ passwordFrom = "password"
 addressTo = "0x.."
 
 # defaults
-maxRounds = 10
+maxRounds = 16
 gasPrice = "1000000000"
 simpleTransactionGas = "21000"
 amountToSend = "20000000000"
