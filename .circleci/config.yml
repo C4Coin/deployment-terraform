@@ -5,16 +5,12 @@ jobs:
       - image: poanetwork/terraform-prep
     working_directory: ~/deployment-terraform/azure
     environment:
-          ANSIBLE_AZURE_AUTH_SOURCE: env  
-    
+          ANSIBLE_AZURE_AUTH_SOURCE: env
+
     steps:
       - run:
           name: Generate shared workspace folder
           command: mkdir -p /tmp/workspace
-    
-      - run:
-          name: Set all.yml config
-          command: echo $config_file | base64 --decode > /tmp/workspace/all.yml
 
       - run:
           name: set id_rsa.pub
@@ -23,7 +19,7 @@ jobs:
       - run:
           name: Generate unique prefix for this build
           command: head /dev/urandom | tr -dc A-Za-z0-9 | head -c 5  | tee /tmp/workspace/prefix
-      
+
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -37,35 +33,35 @@ jobs:
     working_directory: ~/deployment-terraform/azure
     environment:
           ANSIBLE_AZURE_AUTH_SOURCE: env
-          
-    steps:     
+
+    steps:
       - checkout:
           path: ~/deployment-terraform/
-          
+
       - attach_workspace:
-          at: /tmp/workspace/    
-          
+          at: /tmp/workspace/
+
       - run:
           name: Set unique prefix for this build
           command: echo 'export tf_prefix=tf_$(cat /tmp/workspace/prefix)_' >> $BASH_ENV
-          
+
       - run:
-          name: Copy all.yml file to appropriate folder
-          command: cp /tmp/workspace/all.yml  ~/deployment-terraform/azure/group_vars/all.yml
+          name: Copy branch file to all.yml file in appropriate folder
+          command: cp ~/deployment-terraform/azure/group_vars/${CIRCLE_BRANCH}.yml  ~/deployment-terraform/azure/group_vars/all.yml
 
       - run:
           name: Deploy infra
           command: bash -c "ansible-playbook site.yml -e 'PUB_KEY_STORE=/tmp/workspace/id_rsa.pub' -e 'terraform_location=/usr/local/bin/terraform' -e 'backend=true' -e 'tf_prefix=$tf_prefix' $build_attr"
           no_output_timeout: 2000
-    
+
       - run:
           name: Save artifacts
           command: bash -c "ansible-playbook -i ~/deployment-terraform/azure/outputs/latest_deploy_hosts download_outputs.yml -t build -e 'PUB_KEY_STORE=/tmp/workspace/id_rsa.pub' -e 'destination=/tmp/artifacts/' -e 'terraform_location=/usr/local/bin/terraform' $build_attr"
-          
+
       - run:
           name: Save latest hosts output && build prefix
           command: cp ~/deployment-terraform/azure/outputs/latest_deploy_hosts /tmp/workspace/hosts && cp /tmp/workspace/prefix /tmp/artifacts/prefix
-      
+
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -73,38 +69,38 @@ jobs:
           root: /tmp/workspace
           paths:
             - hosts
-  
+
   test:
     docker:
       - image: poanetwork/terraform-prep
     working_directory: ~/deployment-terraform/azure
 
-    steps:      
+    steps:
       - checkout:
           path: ~/deployment-terraform/
-          
+
       - attach_workspace:
           at: /tmp/workspace/
-          
+
       - run:
-          name: Copy all.yml file to appropriate folder
-          command: cp /tmp/workspace/all.yml  ~/deployment-terraform/azure/group_vars/all.yml
-          
+          name: Copy branch file to all.yml file in appropriate folder
+          command: cp ~/deployment-terraform/azure/group_vars/${CIRCLE_BRANCH}.yml  ~/deployment-terraform/azure/group_vars/all.yml
+
       - run:
           name: Fetch pre-defined prefix to environmental variable
           command: echo 'export tf_prefix=tf_$(cat /tmp/workspace/prefix)_' >> $BASH_ENV
-      
+
       - run:
           name: check network
           command: bash -c "ansible-playbook tests.yml -i /tmp/workspace/hosts -e 'PUB_KEY_STORE=/tmp/workspace/id_rsa.pub' -e 'terraform_location=/usr/local/bin/terraform' -e 'tf_prefix=$tf_prefix' -e 'backend=true' $tests_attr"
-          
+
       - run:
           name: Save artifacts
           command: bash -c "ansible-playbook -i /tmp/workspace/hosts download_outputs.yml -t tests -e 'destination=/tmp/artifacts/' -e 'PUB_KEY_STORE=/tmp/workspace/id_rsa.pub' -e 'tf_prefix=$tf_prefix' -e 'terraform_location=/usr/local/bin/terraform' $tests_attr"
-  
+
       - store_test_results:
           path: /tmp/artifacts
-  
+
       - store_artifacts:
           path: /tmp/artifacts
 
@@ -115,17 +111,17 @@ jobs:
     environment:
           ANSIBLE_AZURE_AUTH_SOURCE: env
 
-    steps:      
+    steps:
       - checkout:
           path: ~/deployment-terraform/
-          
+
       - attach_workspace:
           at: /tmp/workspace/
-        
+
       - run:
           name: Fetch pre-defined prefix to environmental variable
           command: echo 'export tf_prefix=tf_$(cat /tmp/workspace/prefix)_' >> $BASH_ENV
-          
+
       - run:
           name: Copy all.yml file to appropriate folder
           command: cp /tmp/workspace/all.yml  ~/deployment-terraform/azure/group_vars/all.yml
