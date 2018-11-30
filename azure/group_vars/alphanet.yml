@@ -39,13 +39,13 @@ bootnode_count: 2
 bootnode_balanced_count: 2
 
 #Required number of initial keys to generate (defaults to 1, not more than 12)
-initial_key_count: 3
+initial_key_count: 4
 
 #Required number of validator nodes to launch (defaults to 1, not more than `initial_key_count`)
-validator_count: 4
+validator_count: 3
 
 #Required number of initial keys to convert to production keys (defaults to 1, not more than `initial_key_count`)
-initial_key_convert_count: 3
+initial_key_convert_count: 4
 
 ##Prefix, that will be used for all resources ("tf-" by default)
 tf_prefix: "tf-"
