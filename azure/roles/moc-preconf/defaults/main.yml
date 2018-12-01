@@ -2,7 +2,7 @@
 DEPLOYMENT_PLAYBOOKS: https://github.com/poanetwork/deployment-playbooks.git
 DEPLOYMENT_TERRAFORM: https://github.com/c4coin/deployment-terraform.git
 DEPLOYMENT_PLAYBOOKS_BRANCH: master
-DEPLOYMENT_TERRAFORM_BRANCH: alphanet
+DEPLOYMENT_TERRAFORM_BRANCH: develop
 POA_CONSENSUS_CONTRACTS: https://github.com/c4coin/poa-network-consensus-contracts.git
 POA_CONSENSUS_CONTRACTS_BRANCH: "alphanet"
 terraform_version: 0.11.7
