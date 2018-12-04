@@ -3,13 +3,13 @@
     paths: "/home/moc/poa-network-consensus-contracts/"
     patterns: "contracts.json"
   register: contracts
-  
+
 - name: Clear old MoC installation
   file:
     state: absent
     path: "/home/moc"
   when: contracts.matched == 0
-  
+
 - name: Slurp variable KEYFILE
   block:
     - slurp:
@@ -17,7 +17,7 @@
       register: KEYFILE
     - set_fact:
         KEYFILE_decoded: "{{ KEYFILE['content'] | b64decode }}"
-  
+
 - name: Slurp variables KEYPASS
   block:
     - slurp:
@@ -46,10 +46,10 @@
       notify:
         - restart poa-parity
         - restart poa-pm2
-    
+
     - name: Run handlers immediately
       meta: flush_handlers
-         
+
     - name: Clone secondary contracts from GitHub
       git:
         repo: "{{ POA_CONSENSUS_CONTRACTS }}"
@@ -69,14 +69,23 @@
         creates: "/home/moc/poa-network-consensus-contracts/contracts.json"
 
     - name: Set contracts.json
-      block:     
+      block:
         - slurp:
             src: /home/moc/poa-network-consensus-contracts/contracts.json
           register:
-            contracts 
+            contracts
         - set_fact:
             contracts_json: "{{ contracts['content'] | b64decode }}"
-        
+
+    - name: Set burn_contracts.json
+      block:
+        - slurp:
+            src: /home/moc/poa-network-consensus-contracts/burn_contracts.json
+          register:
+            burn_contracts
+        - set_fact:
+            burn_contracts_json: "{{ burn_contracts['content'] | b64decode }}"
+
     - name: Comment line at node.toml
       lineinfile:
           path: /home/moc/node.toml
@@ -85,9 +94,15 @@
       notify:
         - restart poa-parity
         - restart poa-pm2
-        
+
 - name: Save contracts.json to output folder
-  copy: 
+  copy:
     src: "/home/moc/poa-network-consensus-contracts/contracts.json"
+    dest: "/home/{{ ansible_user }}/{{ NETWORK_NAME }}/"
+    remote_src: yes
+
+- name: Save burn_contracts.json to output folder
+  copy:
+    src: "/home/moc/poa-network-consensus-contracts/burn_contracts.json"
     dest: "/home/{{ ansible_user }}/{{ NETWORK_NAME }}/"
     remote_src: yes
